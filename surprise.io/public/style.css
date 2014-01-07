@@ -1,0 +1,17 @@
+#container {
+	width:400px;
+}
+
+#container .tile.opened {
+	background-color:red;
+}
+
+#container .tile {
+	text-align: center;
+	display:-webkit-flex;
+	-webkit-align-items: center;
+	width:100px;
+	height:100px;
+	float:left;
+	background-color:#999;
+}
