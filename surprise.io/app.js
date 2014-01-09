@@ -1,3 +1,4 @@
+/* Initialization */
 var express = require('express'),
   http = require('http'),
   path = require('path'),
@@ -9,33 +10,39 @@ var io = require('socket.io').listen(server);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+/* Listen */
 server.listen(3000);
 
+/* Create the initial board */
 var setupTiles = function(){
 	var tiles = new Array();
 	for(var i =0; i < 12; i++){
-		tiles.push({number: i, opened: false});
+		tiles.push({number: i, opened: false, active: false});
 	}
 	return tiles;
 }
 var tiles = setupTiles();
-var currentTile = null;
 
+/*Listen */
 io.sockets.on('connection', function (socket) {
   var emit = function(eventName, data){
   	socket.broadcast.emit(eventName, data);
   	socket.emit(eventName, data);
   }
 
-  /* Dashboard */
-  socket.on('request:getState', function(){
-  	if(!currentTile){
-  		socket.emit('receive:getState', 'noTileSelected')
-  	}
-  })
+  socket.on('request:startTileSelection', function(){
+    emit('receive:startTileSelection', null);
+  });
+
+  socket.on('request:setupTileSelection', function(){
+    emit('receive:setupTileSelection', null);
+  });
 
   socket.on('request:getTiles', function(){
-  	console.log(tiles);
 		emit('receive:getTiles', tiles);
+  });
+
+  socket.on('request:selectTile', function(){
+    emit('receive:selectTile', tiles);
   });
 });

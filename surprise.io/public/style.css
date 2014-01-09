@@ -6,6 +6,17 @@
 	background-color:red;
 }
 
+#container .tile.active {
+	background-color: green;
+}
+
+div.block{
+	width:150px;
+	height: 150px;
+	border:1px solid #666;
+	background-color: #999;
+}
+
 #container .tile {
 	text-align: center;
 	display:-webkit-flex;
