@@ -19,6 +19,7 @@ var setupTiles = function(){
 	return tiles;
 }
 var tiles = setupTiles();
+var currentTile = null;
 
 io.sockets.on('connection', function (socket) {
   var emit = function(eventName, data){
@@ -26,21 +27,15 @@ io.sockets.on('connection', function (socket) {
   	socket.emit(eventName, data);
   }
 
-  socket.on('gotoQuestion', function (data) {
-    emit('gotoQuestion', data);
-  });
-
-  socket.on('setCorrect', function(data){
-  	var item = us.find(tiles, function(it){
-  		return it.number == data
-  	});
-  	if(item){
-  		item.opened = true;
+  /* Dashboard */
+  socket.on('request:getState', function(){
+  	if(!currentTile){
+  		socket.emit('receive:getState', 'noTileSelected')
   	}
-  });
+  })
 
-  socket.on('getTiles', function(){
+  socket.on('request:getTiles', function(){
   	console.log(tiles);
-		emit('send:tiles', tiles);
+		emit('receive:getTiles', tiles);
   });
 });
