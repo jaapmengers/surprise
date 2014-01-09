@@ -81,6 +81,7 @@ quizControllers.controller('BoardCtrl', ['$scope', '$location', 'socket', functi
       if(currentItem){
         currentItem.active = true;
         previousItem = currentItem;
+        console.log("$scope.apply van die andere plek");
         $scope.$apply();
       }
     }, 200);
@@ -112,7 +113,13 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
     });
     if(answer){
       answer.selected = true;
+      console.log(answer);
       //Hier gebleven. Geselecteerde antwoord selecteren.
+      console.log($scope.$$phase);
+      if(!$scope.$$phase){
+        console.log("scope apply vanaf de nieuwe plek");
+        $scope.$apply();
+      }
       //$scope.$apply();
     }
   });
