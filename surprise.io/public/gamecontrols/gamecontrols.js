@@ -9,8 +9,12 @@ app.config(['$routeProvider',
         templateUrl: 'partials/gamecontrols.html',
         controller: 'GameControlsCtrl'
       }).
-      when('/startTileSelection', {
+      when('/starttileselection', {
         templateUrl: 'partials/startselection.html',
+        controller: 'GameControlsCtrl'
+      }).
+      when('/showquestion/:questionNr', {
+        templateUrl: 'partials/showquestion.html',
         controller: 'GameControlsCtrl'
       }).
       otherwise({
@@ -23,17 +27,24 @@ app.config(['$routeProvider',
 
 var quizControllers = angular.module('quizControllers', []);
 
-quizControllers.controller('GameControlsCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
+quizControllers.controller('GameControlsCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
+  var questionNr;
   $scope.startTileSelection = function(){
-    console.log("Start selectie");
-    socket.emit('request:startTileSelection', null, function(s, args){
-      //Error handling
-    });  
+    socket.emit('request:startTileSelection', null);  
   }
 
   socket.on('receive:setupTileSelection', function(data){
-    $location.path('startTileSelection');
+    $location.path('/starttileselection');
   });
+
+  socket.on('receive:tileSelected', function(data){
+    $location.path('/showquestion/' + data.questionNr);
+  })
+
+  $scope.showQuestion = function(){
+    var questionNr = $routeParams.questionNr;
+    socket.emit('request:showQuestion', questionNr);
+  }
 
 }]);

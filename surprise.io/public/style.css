@@ -10,6 +10,14 @@
 	background-color: green;
 }
 
+body > .correct {
+	background-color:red;
+}
+
+body > .wrong {
+	background-color: green;
+}
+
 div.block{
 	width:150px;
 	height: 150px;

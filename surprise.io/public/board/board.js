@@ -13,6 +13,14 @@ app.config(['$routeProvider',
         templateUrl: 'partials/question.html',
         controller: 'QuestionCtrl'
       }).
+      when('/correct', {
+        templateUrl: 'partials/correct.html',
+        controller: 'QuestionCtrl'
+      }).
+      when('/wrong', {
+        templateUrl: 'partials/wrong.html',
+        controller: 'QuestionCtrl'
+      }).
       otherwise({
         redirectTo: '/board'
       });
@@ -84,13 +92,29 @@ quizControllers.controller('BoardCtrl', ['$scope', '$location', 'socket', functi
     currentTile = _.find($scope.tiles, function(it){
       return it.active;
     });
-    console.log(currentTile);
+
+    currentQuestion = questions.pop();
+    socket.emit('request:tileSelected', {questionNr: currentQuestion.number});
+  });
+
+  socket.on('receive:showQuestion', function(){
+    $location.path('/question')
   });
 }]);
 
 quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
-  $scope.onClick = function(){
-    $location.path('/board');
-  }
+  $scope.question = currentQuestion;
+
+  socket.on('receive:doAnswer', function(data){
+    var answer = _.find($scope.question.answers, function(it){
+      return it.number == data;
+    });
+    if(answer){
+      answer.selected = true;
+      //Hier gebleven. Geselecteerde antwoord selecteren.
+      //$scope.$apply();
+    }
+  });
+
 }]);

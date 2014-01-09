@@ -45,4 +45,20 @@ io.sockets.on('connection', function (socket) {
   socket.on('request:selectTile', function(){
     emit('receive:selectTile', tiles);
   });
+
+  socket.on('request:openTile', function(data){
+    //doStuff
+  });
+
+  socket.on('request:tileSelected', function(data){
+    emit('receive:tileSelected', data);
+  });
+
+  socket.on('request:showQuestion', function(data){
+    emit('receive:showQuestion', data);
+  });
+
+  socket.on('request:doAnswer', function(data){
+    emit('receive:doAnswer', data);
+  });
 });

@@ -13,6 +13,10 @@ app.config(['$routeProvider',
         templateUrl: 'partials/tileselection.html',
         controller: 'PlayerControlsCtrl'
       }).
+      when('/question/:questionNr', {
+        templateUrl: 'partials/question.html',
+        controller: 'QuizCtrl'
+      }).
       otherwise({
         redirectTo: '/leeg'
       });
@@ -20,10 +24,6 @@ app.config(['$routeProvider',
 
 var quizControllers = angular.module('quizControllers', []);
 
-var currentQuestion = null;
-var startedTileSelection = false;
-
-/* First, does some routing if necessary. Sets up selection of tile and gets a question  */
 quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.onClick = function(){
@@ -35,4 +35,20 @@ quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket
   socket.on('receive:startTileSelection', function(data){
     $location.path('/tileselection');
   });
+
+  socket.on('receive:showQuestion', function(data){
+    $location.path('/question/' + data);
+  })
 }]);
+
+quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+  var nr = $routeParams.questionNr;
+  $scope.question = _.find(questions, function(it){
+    return it.number == nr;
+  });
+
+  $scope.doAnswer = function(answer){
+    socket.emit('request:doAnswer', answer.number);
+  }
+}]);  
+
