@@ -1,5 +1,5 @@
 <h1>{{question.number}}. {{question.question}}</h1>
 
 <ul>
-<li ng-repeat="answer in question.answers" class="{selected: answer.selected}">{{answer.answer}}</li>
+<li ng-repeat="answer in question.answers" class="answer" ng-class="{selected: answer.selected}">{{answer.answer}}</li>
 </ul>

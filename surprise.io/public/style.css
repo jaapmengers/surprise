@@ -25,6 +25,10 @@ div.block{
 	background-color: #999;
 }
 
+.answer.selected {
+	background-color: red;
+}
+
 #container .tile {
 	text-align: center;
 	display:-webkit-flex;

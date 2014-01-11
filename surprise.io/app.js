@@ -61,4 +61,27 @@ io.sockets.on('connection', function (socket) {
   socket.on('request:doAnswer', function(data){
     emit('receive:doAnswer', data);
   });
+
+  socket.on('request:enableSubmitAnswer', function(data){
+    emit('receive:enableSubmitAnswer', data);
+  });
+
+  socket.on('request:doSubmitAnswer', function(data){
+    emit('receive:doSubmitAnswer', data);
+  });
+
+  socket.on('request:possiblyOpenTileAndEnableNextRound', function(data){
+    if(data.correct){
+      var tile = us.find(tiles, function(ti){
+        return ti.number == data.number;
+      });
+      tile.opened = true;
+    }
+
+    emit('receive:enableNextRound');
+  });
+
+  socket.on('request:goToNextRound', function(data){
+    emit('receive:goToNextRound');
+  });
 });
