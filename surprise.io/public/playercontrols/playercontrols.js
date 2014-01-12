@@ -23,8 +23,8 @@ app.config(['$routeProvider',
   }]);
 
 var quizControllers = angular.module('quizControllers', []);
-
 var didBind = false;
+
 quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.onClick = function(){
@@ -34,15 +34,20 @@ quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket
   }
 
   if(!didBind){
+
     didBind = true;
+
     socket.on('receive:startTileSelection', function(data){
+      console.log('receive:startTileSelection');
       $location.path('/tileselection');
     });
 
     socket.on('receive:showQuestion', function(data){
+      console.log('receive:showQuestion');
       $location.path('/question/' + data);
     });
   }
+
 }]);
 
 quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {

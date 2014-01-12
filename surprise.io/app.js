@@ -6,7 +6,7 @@ var express = require('express'),
 
 var app = module.exports = express();
 var server = http.createServer(app);
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, {log: false});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -25,17 +25,24 @@ var tiles = setupTiles();
 
 /*Listen */
 io.sockets.on('connection', function (socket) {
+
+  console.log('on connect', socket.id);
+  socket.on('disconnect', function(){
+    console.log('on disconnect', socket.id);
+  });
+
   var emit = function(eventName, data){
-  	socket.broadcast.emit(eventName, data);
-  	socket.emit(eventName, data);
-  }
+    console.log(eventName);
+  	io.sockets.emit(eventName, data);
+  };
 
   socket.on('request:startTileSelection', function(){
     emit('receive:startTileSelection', null);
   });
 
-  socket.on('request:setupTileSelection', function(){
-    emit('receive:setupTileSelection', null);
+  socket.on('request:setupTileSelection', function(data){
+    console.log('request:setupTileSelection', data);
+    emit('receive:setupTileSelection', data);
   });
 
   socket.on('request:getTiles', function(){
@@ -51,6 +58,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('request:tileSelected', function(data){
+    console.log('tileSelected', data.iets);
     emit('receive:tileSelected', data);
   });
 
@@ -84,4 +92,8 @@ io.sockets.on('connection', function (socket) {
   socket.on('request:goToNextRound', function(data){
     emit('receive:goToNextRound');
   });
+
+  socket.on('request:doInit', function(){
+    emit('receive:doInit');
+  })
 });
