@@ -55,7 +55,7 @@ quizControllers.controller('StartSelectionCtrl', ['$scope', '$location', '$route
   }
 
   socket.on('receive:tileSelected', function(data){
-      console.log('receive:tileSelected', data.iets);
+      console.log('receive:tileSelected', data);
       $location.path('/showquestion/' + data.questionNr);
       $scope.$$phase || $scope.$apply();
   });

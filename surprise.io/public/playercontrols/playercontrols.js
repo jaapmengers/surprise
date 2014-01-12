@@ -44,7 +44,7 @@ quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket
   });
 
   socket.on('receive:showQuestion', function(data){
-    console.log('receive:showQuestion');
+    console.log('receive:showQuestion', data);
     $location.path('/question/' + data);
     $scope.$$phase || $scope.$apply();
   });
@@ -61,12 +61,11 @@ quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', '
     socket.emit('request:doAnswer', answer.number);
   }
 
-  // $scope.$on('$destroy', function (event) {
-  //   socket.removeAllListeners();
-  // });
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
 
   var goToNextRound = function(){
-    console.log("Hallo?");
     $location.path('/leeg');
     $scope.$$phase || $scope.$apply();
   };

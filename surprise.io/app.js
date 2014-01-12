@@ -58,7 +58,7 @@ io.sockets.on('connection', function (socket) {
   });
 
   socket.on('request:tileSelected', function(data){
-    console.log('tileSelected', data.iets);
+    console.log('tileSelected');
     emit('receive:tileSelected', data);
   });
 

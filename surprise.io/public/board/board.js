@@ -98,10 +98,8 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
       return it.active;
     });
 
-    var iets = Math.random();
-
     currentQuestion = questions.pop();
-    emit('request:tileSelected', {questionNr: currentQuestion.number, iets: iets});
+    emit('request:tileSelected', {questionNr: currentQuestion.number});
   };
 
   var getActiveTiles = function(){
@@ -145,7 +143,6 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
 
 }]);
 
-var didBindQuiz = false;
 quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.question = currentQuestion;
@@ -157,34 +154,35 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
     $scope.$$phase || $scope.$apply();
   };
 
-  if(!didBindQuiz){
-    didBindQuiz = true;
     
-    socket.on('receive:doAnswer', function(data){
-      console.log('receive:doAnswer');
-      var answer = _.find($scope.question.answers, function(it){
-        return it.number == data;
-      });
-      if(answer){
-        answer.selected = true;
-        selectedAnswer = answer;
-        $scope.$$phase || $scope.$apply()
-        enableSubmitAnswer();
-      }
+  socket.on('receive:doAnswer', function(data){
+    console.log('receive:doAnswer');
+    var answer = _.find($scope.question.answers, function(it){
+      return it.number == data;
     });
+    if(answer){
+      answer.selected = true;
+      selectedAnswer = answer;
+      $scope.$$phase || $scope.$apply()
+      enableSubmitAnswer();
+    }
+  });
 
-    socket.on('receive:doSubmitAnswer', function(data){
-      socket.emit('request:possiblyOpenTileAndEnableNextRound', {number: currentTile.number, correct: selectedAnswer.correct});
-      if(selectedAnswer.correct){
-        $location.path('/correct');
-      } else {
-        $location.path('/wrong');
-      }
-      $scope.$$phase || $scope.$apply();
-    });
+  socket.on('receive:doSubmitAnswer', function(data){
+    socket.emit('request:possiblyOpenTileAndEnableNextRound', {number: currentTile.number, correct: selectedAnswer.correct});
+    if(selectedAnswer.correct){
+      $location.path('/correct');
+    } else {
+      $location.path('/wrong');
+    }
+    $scope.$$phase || $scope.$apply();
+  });
 
-    socket.on('receive:goToNextRound', goToNextRound);
-  }
+  socket.on('receive:goToNextRound', goToNextRound);
+
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
 
   var enableSubmitAnswer = function(){
     console.log('request:enableSubmitAnswer');
