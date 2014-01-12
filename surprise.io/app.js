@@ -95,5 +95,5 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('request:doInit', function(){
     emit('receive:doInit');
-  })
+  });
 });

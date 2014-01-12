@@ -33,21 +33,22 @@ quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket
     });  
   }
 
-  if(!didBind){
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
 
-    didBind = true;
+  socket.on('receive:startTileSelection', function(data){
+    console.log('receive:startTileSelection');
+    $location.path('/tileselection');
+    $scope.$$phase || $scope.$apply();
+  });
 
-    socket.on('receive:startTileSelection', function(data){
-      console.log('receive:startTileSelection');
-      $location.path('/tileselection');
-    });
-
-    socket.on('receive:showQuestion', function(data){
-      console.log('receive:showQuestion');
-      $location.path('/question/' + data);
-    });
-  }
-
+  socket.on('receive:showQuestion', function(data){
+    console.log('receive:showQuestion');
+    $location.path('/question/' + data);
+    $scope.$$phase || $scope.$apply();
+  });
+  
 }]);
 
 quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
@@ -59,5 +60,17 @@ quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', '
   $scope.doAnswer = function(answer){
     socket.emit('request:doAnswer', answer.number);
   }
+
+  // $scope.$on('$destroy', function (event) {
+  //   socket.removeAllListeners();
+  // });
+
+  var goToNextRound = function(){
+    console.log("Hallo?");
+    $location.path('/leeg');
+    $scope.$$phase || $scope.$apply();
+  };
+
+  socket.on('receive:goToNextRound', goToNextRound);
 }]);  
 

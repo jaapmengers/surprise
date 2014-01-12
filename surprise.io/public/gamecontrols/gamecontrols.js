@@ -9,10 +9,6 @@ app.config(['$routeProvider',
         templateUrl: 'partials/init.html',
         controller: 'InitCtrl'
       }).
-      when('/gamecontrols', {
-        templateUrl: 'partials/gamecontrols.html',
-        controller: 'GameControlsCtrl'
-      }).
       when('/starttileselection', {
         templateUrl: 'partials/startselection.html',
         controller: 'StartSelectionCtrl'
@@ -35,57 +31,71 @@ app.config(['$routeProvider',
   }]);
 
 
-/* Controllers */
 
-var didBind = false;
 var quizControllers = angular.module('quizControllers', []);
 
-quizControllers.controller('GameControlsCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+quizControllers.controller('InitCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
-  var questionNr;
+  $scope.init = function(){
+    socket.emit('request:doInit');
+  }
+
+  socket.on('receive:setupTileSelection', function(data){
+    console.log('Start tile selection');
+    $location.path('/starttileselection');
+    $scope.$$phase || $scope.$apply();
+  });
+
+}]);
+
+quizControllers.controller('StartSelectionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+
   $scope.startTileSelection = function(){
     socket.emit('request:startTileSelection', null);  
   }
 
-  if(!didBind){
-    socket.on('receive:setupTileSelection', function(data){
-      console.log('receive:setupTileSelection', data);
-      $location.path('/starttileselection');
-    });
-
-    socket.on('receive:tileSelected', function(data){
+  socket.on('receive:tileSelected', function(data){
       console.log('receive:tileSelected', data.iets);
       $location.path('/showquestion/' + data.questionNr);
-    })
+      $scope.$$phase || $scope.$apply();
+  });
+}]);
 
-    socket.on('receive:enableSubmitAnswer', function(){
-      console.log('receive:enableSubmitAnswer');
-      $location.path('/submitanswer');
-    });
+quizControllers.controller('ShowQuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
-    socket.on('receive:enableNextRound', function(data){
-      console.log('receive:enableNextRound');
-      $location.path('/nextround');      
-    });
-    didBind = true;
-  }
   $scope.showQuestion = function(){
     var questionNr = $routeParams.questionNr;
     console.log('request:showQuestion');
     socket.emit('request:showQuestion', questionNr);
   }
 
+  socket.on('receive:enableSubmitAnswer', function(){
+    console.log('receive:enableSubmitAnswer');
+    $location.path('/submitanswer');
+    $scope.$$phase || $scope.$apply();
+  });
+
+}]);
+
+quizControllers.controller('SubmitAnswerCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+
   $scope.submitAnswer = function(){
     console.log('request:doSubmitAnswer');
     socket.emit('request:doSubmitAnswer');
   }
 
+  socket.on('receive:enableNextRound', function(data){
+    console.log('receive:enableNextRound');
+    $location.path('/nextround');   
+    $scope.$$phase || $scope.$apply();   
+  });
+
+}]);
+
+quizControllers.controller('NextRoundCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+
   $scope.goToNextRound = function(){
     console.log('request:goToNextRound');
     socket.emit('request:goToNextRound');
-  }
-
-  $scope.init = function(){
-    socket.emit('request:doInit');
   }
 }]);

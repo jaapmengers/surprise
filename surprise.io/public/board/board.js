@@ -5,7 +5,7 @@ var app = angular.module('quizApp', ['ngRoute', 'quizControllers']);
 app.config(['$routeProvider', 
   function($routeProvider){
     $routeProvider.
-      when('/board', {
+      when('/board/:newRound?', {
         templateUrl: 'partials/board.html',
         controller: 'BoardCtrl'
       }).
@@ -22,7 +22,7 @@ app.config(['$routeProvider',
         controller: 'QuestionCtrl'
       }).
       otherwise({
-        redirectTo: '/board'
+        redirectTo: '/board/true'
       });
   }]);
 
@@ -32,10 +32,12 @@ var didBind = false;
 
 var quizControllers = angular.module('quizControllers', []);
 
-quizControllers.controller('BoardCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
+quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 'socket', function ($scope, $routeParams, $location, socket) {
   
   var interval;
   var tileNr;
+
+  $scope.tiles = new Array();
 
   /* Helper function to emit */
   var emit = function(eventName, data){
@@ -44,18 +46,21 @@ quizControllers.controller('BoardCtrl', ['$scope', '$location', 'socket', functi
   }
 
   var init = function(){
-    $scope.tiles = new Array();
     emit('request:getTiles');
     emit('request:setupTileSelection', Math.random());
   }
 
-  var setTiles = function(tiles) {
-    $scope.tiles = tiles;
+  if($routeParams.newRound){
+    console.log('init from routeParams');
+    init();
   }
 
-  $scope.$on('$destroy', function iVeBeenDismissed() {
-    console.log('BoardCtrl is destroyed');
-  });
+  var setTiles = function(tiles) {
+    console.log('Setting tiles');
+    console.log($scope);
+    $scope.tiles = tiles;
+    $scope.$apply();
+  }
 
   var startTileSelection = function(){
     
@@ -114,35 +119,26 @@ quizControllers.controller('BoardCtrl', ['$scope', '$location', 'socket', functi
   var showQuestion = function(){
     console.log('receive:showQuestion');
     $location.path('/question')
+    $scope.$$phase || $scope.$apply();
   };
 
-  var goToNextRound = function(){
-    console.log('receive:goToNextRound');
-    console.log("Resetting state and starting new round");
-    init();
-    $location.path('/board');
-  };
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
 
-  if(!didBind){
-    console.log('Binding board');
-    socket.on('receive:getTiles', setTiles);
-    socket.on('receive:startTileSelection', startTileSelection);
-    socket.on('receive:selectTile', selectTile);
-    socket.on('receive:showQuestion', showQuestion);
-    socket.on('receive:goToNextRound', goToNextRound);
-    socket.on('receive:doInit', init);
-    didBind = true;
-  }
-
+  console.log('Binding board');
+  socket.on('receive:getTiles', setTiles);
+  socket.on('receive:startTileSelection', startTileSelection);
+  socket.on('receive:selectTile', selectTile);
+  socket.on('receive:showQuestion', showQuestion);
+  socket.on('receive:doInit', init);
 
   /* Hier gebleven. Volgende stap is overwegen of het blok 'setup tiles' 
    * beter op basis van een event vanuit de GameControls kan verlopen.
    * Vervolgens:
    * - Checken of het resetten van de status van het board werkt.
-   * - 
+   * - Supportvote spullen bouwen
    * - De lijst van vragen en de status daarvan persisten in local storage
-   * - Glitches wegwerken. E.g. het soms willekeurig verschijnen van het 'start selectie' blok
-   * - Opengaan van vakje animeren?
    * - Stylen
    * - Vragen verzinnen
    */
@@ -154,6 +150,12 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
 
   $scope.question = currentQuestion;
   var selectedAnswer = null;
+
+  var goToNextRound = function(){
+    console.log('receive:goToNextRound');
+    $location.path('/board/true');
+    $scope.$$phase || $scope.$apply();
+  };
 
   if(!didBindQuiz){
     didBindQuiz = true;
@@ -172,14 +174,16 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
     });
 
     socket.on('receive:doSubmitAnswer', function(data){
-      console.log('receive:doSubmitAnswer');
       socket.emit('request:possiblyOpenTileAndEnableNextRound', {number: currentTile.number, correct: selectedAnswer.correct});
       if(selectedAnswer.correct){
         $location.path('/correct');
       } else {
         $location.path('/wrong');
       }
+      $scope.$$phase || $scope.$apply();
     });
+
+    socket.on('receive:goToNextRound', goToNextRound);
   }
 
   var enableSubmitAnswer = function(){
