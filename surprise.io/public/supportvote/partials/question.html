@@ -1,0 +1,5 @@
+<h1>{{question.number}}. {{question.question}}</h1>
+
+<ul>
+<li ng-repeat="answer in question.answers" ng-click="vote(answer)">{{answer.answer}}</li>
+</ul>
