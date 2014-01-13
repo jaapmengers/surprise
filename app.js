@@ -10,8 +10,11 @@ var io = require('socket.io').listen(server, {log: false});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+var port = process.env.PORT || 5000;
+
+
 /* Listen */
-server.listen(3000);
+server.listen(port);
 
 /* Create the initial board */
 var setupTiles = function(){
