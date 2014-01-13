@@ -70,6 +70,6 @@ quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', '
     $scope.$$phase || $scope.$apply();
   };
 
-  socket.on('receive:goToNextRound', goToNextRound);
+  socket.on('receive:roundEnded', goToNextRound);
 }]);  
 

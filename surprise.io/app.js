@@ -23,6 +23,12 @@ var setupTiles = function(){
 }
 var tiles = setupTiles();
 
+var initVotes = function(){
+  return {1: 0, 2: 0, 3: 0, 4: 0};
+}
+
+var votes = initVotes();
+
 /*Listen */
 io.sockets.on('connection', function (socket) {
 
@@ -76,6 +82,13 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('request:doSubmitAnswer', function(data){
     emit('receive:doSubmitAnswer', data);
+    emit('receive:roundEnded', null);
+    votes = initVotes();
+  });
+
+  socket.on('request:doVote', function(data){
+    votes[data]++;
+    emit('receive:votesUpdated', votes);
   });
 
   socket.on('request:possiblyOpenTileAndEnableNextRound', function(data){

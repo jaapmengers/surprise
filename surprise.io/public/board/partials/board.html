@@ -1,4 +1,4 @@
 <div id="container">
-	<div ng-repeat="tile in tiles" class="tile" ng-class="{active: tile.active, opened: tile.opened}">{{tile.number}}</div>
+	<div ng-repeat="tile in tiles" class="tile" ng-class="{active: tile.active, opened: tile.opened}" style="{{getLocation(tile, 220)}}"></div>
 </div>
 

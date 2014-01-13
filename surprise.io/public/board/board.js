@@ -41,7 +41,6 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
 
   /* Helper function to emit */
   var emit = function(eventName, data){
-    console.log(eventName, data);
     socket.emit(eventName, data);  
   }
 
@@ -51,13 +50,10 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   }
 
   if($routeParams.newRound){
-    console.log('init from routeParams');
     init();
   }
 
   var setTiles = function(tiles) {
-    console.log('Setting tiles');
-    console.log($scope);
     $scope.tiles = tiles;
     $scope.$apply();
   }
@@ -99,8 +95,17 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
     });
 
     currentQuestion = questions.pop();
+    console.log(currentQuestion);
     emit('request:tileSelected', {questionNr: currentQuestion.number});
   };
+
+  $scope.getLocation = function(tile, offset){
+    var row = Math.floor(tile.number / 4);
+    /* tiles are not numbered zero based, so minus one for calculations */
+    var col = tile.number % 4;
+    console.log({row: row, col: col, tile: tile.number});
+    return 'background-position: top -' + row * offset + 'px left -' + col * offset +'px';
+  }
 
   var getActiveTiles = function(){
     return $scope.tiles.filter(function(it){
@@ -134,7 +139,6 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   /* Hier gebleven. Volgende stap is overwegen of het blok 'setup tiles' 
    * beter op basis van een event vanuit de GameControls kan verlopen.
    * Vervolgens:
-   * - Checken of het resetten van de status van het board werkt.
    * - Supportvote spullen bouwen
    * - De lijst van vragen en de status daarvan persisten in local storage
    * - Stylen
@@ -154,6 +158,13 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
     $scope.$$phase || $scope.$apply();
   };
 
+  $scope.calculatePercentage = function(number, total){
+    if(!number || !total)
+      return 0;
+
+    return Math.round((number / total) * 100);
+  }
+
     
   socket.on('receive:doAnswer', function(data){
     console.log('receive:doAnswer');
@@ -166,6 +177,13 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', fun
       $scope.$$phase || $scope.$apply()
       enableSubmitAnswer();
     }
+  });
+
+  socket.on('receive:votesUpdated', function(data){
+    $scope.votes = data;
+    $scope.totalVotes = _.reduce(data, function(memo, num) { return memo + num}, 0);
+    console.log(data, $scope.totalVotes);
+    $scope.$$phase || $scope.$apply();
   });
 
   socket.on('receive:doSubmitAnswer', function(data){
