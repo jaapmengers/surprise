@@ -46,6 +46,10 @@ quizControllers.controller('InitCtrl', ['$scope', '$location', '$routeParams', '
     $scope.$$phase || $scope.$apply();
   });
 
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
+
 }]);
 
 quizControllers.controller('StartSelectionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
@@ -59,6 +63,11 @@ quizControllers.controller('StartSelectionCtrl', ['$scope', '$location', '$route
       $location.path('/showquestion/' + data.questionNr);
       $scope.$$phase || $scope.$apply();
   });
+
+  $scope.$on('$destroy', function (event) {
+      socket.removeAllListeners();
+  });
+
 }]);
 
 quizControllers.controller('ShowQuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
@@ -73,6 +82,10 @@ quizControllers.controller('ShowQuestionCtrl', ['$scope', '$location', '$routePa
     console.log('receive:enableSubmitAnswer');
     $location.path('/submitanswer');
     $scope.$$phase || $scope.$apply();
+  });
+
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
   });
 
 }]);
@@ -90,6 +103,10 @@ quizControllers.controller('SubmitAnswerCtrl', ['$scope', '$location', '$routePa
     $scope.$$phase || $scope.$apply();   
   });
 
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
+
 }]);
 
 quizControllers.controller('NextRoundCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
@@ -97,5 +114,12 @@ quizControllers.controller('NextRoundCtrl', ['$scope', '$location', '$routeParam
   $scope.goToNextRound = function(){
     console.log('request:goToNextRound');
     socket.emit('request:goToNextRound');
+    
+    $location.path('/init');
+    $scope.$$phase || $scope.$apply();
   }
+
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
 }]);

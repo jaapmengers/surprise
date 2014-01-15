@@ -147,9 +147,16 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
 
 }]);
 
-quizControllers.controller('QuestionCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
+quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
   $scope.question = currentQuestion;
+
+  // var nr = $routeParams.nr;
+  // console.log(nr);
+  // $scope.question = _.find(questions, function(it){
+  //   return it.number == nr;
+  // });
+
   var selectedAnswer = null;
 
   var goToNextRound = function(){

@@ -28,8 +28,9 @@ var didBind = false;
 quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.onClick = function(){
-    socket.emit('request:selectTile', null, function(s, args){
-      //Error handling
+      socket.emit('request:selectTile', null, function(s, args){
+      $location.path('/leeg');
+      $scope.$$phase || $scope.$apply();
     });  
   }
 
@@ -57,8 +58,15 @@ quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', '
     return it.number == nr;
   });
 
+  $scope.answerenabled = true;
+
   $scope.doAnswer = function(answer){
-    socket.emit('request:doAnswer', answer.number);
+    if($scope.answerenabled){
+      socket.emit('request:doAnswer', answer.number);
+      answer.selected = true;
+      $scope.answerenabled = false;
+      $scope.$$phase || $scope.$apply();
+    }
   }
 
   $scope.$on('$destroy', function (event) {

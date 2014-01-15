@@ -46,11 +46,15 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams
     $scope.$$phase || $scope.$apply();
   }
 
+  $scope.answerenabled = true;
+
   $scope.vote = function(answer){
-    console.log(answer.number);
-    socket.emit('request:doVote', answer.number);
-    $location.path('/leeg');
-    $scope.$$phase || $scope.$apply();
+    if($scope.answerenabled){
+      socket.emit('request:doVote', answer.number);
+      $scope.answerenabled = false;
+      answer.selected = true;
+      $scope.$$phase || $scope.$apply();
+    }
   };
 
   socket.on('receive:roundEnded', roundEnded);

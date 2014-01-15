@@ -1,10 +1,24 @@
-<h1>{{question.number}}. {{question.question}}</h1>
-
-<ul>
-<li ng-repeat="answer in question.answers" class="answer">
-	<div class="answertext" ng-class="{selected: answer.selected}">{{answer.answer}}</div>
-	<div>
-		<div class="bar" style="width:{{calculatePercentage(votes[answer.number], totalVotes)}}%"></div>
+<div class="jumbotron">
+	<div class="container">
+		<p>{{question.question}}</p>
 	</div>
-</li>
-</ul>
+</div>
+
+<div class="container">
+	<div ng-repeat="answer in question.answers" class="row">
+		
+			<div class="well answertext container" ng-class="{selected: answer.selected}">
+				<div class="col-md-8">
+					<h3>A. {{answer.answer}}</h3>
+				</div>
+				<div class="col-md-4 centered">
+					<div class="progress">
+		  			<div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:{{calculatePercentage(votes[answer.number], totalVotes)}}%">
+		  			</div>
+					</div>
+				</div>
+			</div>
+			
+		<!-- <div class="col-md-4 bar" style=""></div> -->
+	</div>
+</div
