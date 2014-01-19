@@ -112,4 +112,12 @@ io.sockets.on('connection', function (socket) {
   socket.on('request:doInit', function(){
     emit('receive:doInit');
   });
+
+  socket.on('request:finishGame', function(){
+    emit('receive:finishGame');
+  });
+
+  socket.on('request:enableFinishGame', function(){
+    emit('receive:enableFinishGame');
+  });
 });

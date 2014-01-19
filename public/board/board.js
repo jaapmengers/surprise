@@ -21,6 +21,10 @@ app.config(['$routeProvider',
         templateUrl: 'partials/wrong.html',
         controller: 'QuestionCtrl'
       }).
+      when('/finishgame', {
+        templateUrl: 'partials/finishgame.html',
+        controller: 'FinishGameCtrl'
+      }).
       otherwise({
         redirectTo: '/board/true'
       });
@@ -46,7 +50,6 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
 
   var init = function(){
     emit('request:getTiles');
-    emit('request:setupTileSelection', Math.random());
   }
 
   if($routeParams.newRound){
@@ -56,6 +59,12 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   var setTiles = function(tiles) {
     $scope.tiles = tiles;
     $scope.$apply();
+    var activeTiles = getActiveTiles();
+    if(activeTiles.length == 0){
+      emit('request:enableFinishGame');
+    } else {
+      emit('request:setupTileSelection', Math.random());
+    }
   }
 
   var startTileSelection = function(){
@@ -101,9 +110,7 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
 
   $scope.getLocation = function(tile, offset){
     var row = Math.floor(tile.number / 4);
-    /* tiles are not numbered zero based, so minus one for calculations */
     var col = tile.number % 4;
-    console.log({row: row, col: col, tile: tile.number});
     return 'background-position: top -' + row * offset + 'px left -' + col * offset +'px';
   }
 
@@ -120,10 +127,14 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   };
 
   var showQuestion = function(){
-    console.log('receive:showQuestion');
     $location.path('/question')
     $scope.$$phase || $scope.$apply();
   };
+
+  var finishGame = function(){
+    $location.path('/finishgame')
+    $scope.$$phase || $scope.$apply();
+  }
 
   $scope.$on('$destroy', function (event) {
     socket.removeAllListeners();
@@ -135,6 +146,7 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   socket.on('receive:selectTile', selectTile);
   socket.on('receive:showQuestion', showQuestion);
   socket.on('receive:doInit', init);
+  socket.on('receive:finishGame', finishGame);
 
   /* Hier gebleven. Volgende stap is overwegen of het blok 'setup tiles' 
    * beter op basis van een event vanuit de GameControls kan verlopen.
@@ -213,4 +225,8 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams
     console.log('request:enableSubmitAnswer');
     socket.emit('request:enableSubmitAnswer');
   }
+}]);
+
+quizControllers.controller('FinishGameCtrl', ['$scope', function ($scope) {
+
 }]);

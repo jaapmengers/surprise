@@ -25,6 +25,10 @@ app.config(['$routeProvider',
         templateUrl: 'partials/nextround.html',
         controller: 'NextRoundCtrl'
       }).
+      when('/finishgame', {
+        templateUrl: 'partials/finishgame.html',
+        controller: 'FinishGameCtrl'
+      }).
       otherwise({
         redirectTo: '/init'
       });
@@ -43,6 +47,11 @@ quizControllers.controller('InitCtrl', ['$scope', '$location', '$routeParams', '
   socket.on('receive:setupTileSelection', function(data){
     console.log('Start tile selection');
     $location.path('/starttileselection');
+    $scope.$$phase || $scope.$apply();
+  });
+
+  socket.on('receive:enableFinishGame', function(data){
+    $location.path('/finishgame');
     $scope.$$phase || $scope.$apply();
   });
 
@@ -90,7 +99,7 @@ quizControllers.controller('ShowQuestionCtrl', ['$scope', '$location', '$routePa
 
 }]);
 
-quizControllers.controller('SubmitAnswerCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+quizControllers.controller('SubmitAnswerCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.submitAnswer = function(){
     console.log('request:doSubmitAnswer');
@@ -109,11 +118,24 @@ quizControllers.controller('SubmitAnswerCtrl', ['$scope', '$location', '$routePa
 
 }]);
 
-quizControllers.controller('NextRoundCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
+quizControllers.controller('NextRoundCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.goToNextRound = function(){
-    console.log('request:goToNextRound');
     socket.emit('request:goToNextRound');
+    
+    $location.path('/init');
+    $scope.$$phase || $scope.$apply();
+  }
+
+  $scope.$on('$destroy', function (event) {
+    socket.removeAllListeners();
+  });
+}]);
+
+quizControllers.controller('FinishGameCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
+
+  $scope.finishGame = function(){
+    socket.emit('request:finishGame');
     
     $location.path('/init');
     $scope.$$phase || $scope.$apply();

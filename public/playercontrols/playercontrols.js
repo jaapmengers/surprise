@@ -28,11 +28,10 @@ var didBind = false;
 quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket', function ($scope, $location, socket) {
 
   $scope.onClick = function(){
-      socket.emit('request:selectTile', null, function(s, args){
-      $location.path('/leeg');
-      $scope.$$phase || $scope.$apply();
-    });  
-  }
+    socket.emit('request:selectTile', null);
+    $location.path('/leeg');
+    $scope.$$phase || $scope.$apply();
+  };
 
   $scope.$on('$destroy', function (event) {
     socket.removeAllListeners();
