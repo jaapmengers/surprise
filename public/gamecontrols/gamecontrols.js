@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('quizApp', ['ngRoute', 'quizControllers']);
+var app = angular.module('quizApp', ['ngRoute', 'ngSanitize', 'quizControllers']);
 
 app.config(['$routeProvider', 
   function($routeProvider){
@@ -50,8 +50,20 @@ quizControllers.controller('InitCtrl', ['$scope', '$location', '$routeParams', '
     $scope.$$phase || $scope.$apply();
   });
 
+  socket.on('receive:tileSelected', function(data){
+      console.log('receive:tileSelected', data);
+      $location.path('/showquestion/' + data.questionNr);
+      $scope.$$phase || $scope.$apply();
+  });
+
   socket.on('receive:enableFinishGame', function(data){
     $location.path('/finishgame');
+    $scope.$$phase || $scope.$apply();
+  });
+
+  socket.on('receive:enableSubmitAnswer', function(){
+    console.log('receive:enableSubmitAnswer');
+    $location.path('/submitanswer');
     $scope.$$phase || $scope.$apply();
   });
 
@@ -65,33 +77,19 @@ quizControllers.controller('StartSelectionCtrl', ['$scope', '$location', '$route
 
   $scope.startTileSelection = function(){
     socket.emit('request:startTileSelection', null);  
+    $location.path('/init');
+    $scope.$$phase || $scope.$apply();
   }
-
-  socket.on('receive:tileSelected', function(data){
-      console.log('receive:tileSelected', data);
-      $location.path('/showquestion/' + data.questionNr);
-      $scope.$$phase || $scope.$apply();
-  });
-
-  $scope.$on('$destroy', function (event) {
-      socket.removeAllListeners();
-  });
-
 }]);
 
 quizControllers.controller('ShowQuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
   $scope.showQuestion = function(){
     var questionNr = $routeParams.questionNr;
-    console.log('request:showQuestion');
     socket.emit('request:showQuestion', questionNr);
-  }
-
-  socket.on('receive:enableSubmitAnswer', function(){
-    console.log('receive:enableSubmitAnswer');
-    $location.path('/submitanswer');
+    $location.path('/init');
     $scope.$$phase || $scope.$apply();
-  });
+  }
 
   $scope.$on('$destroy', function (event) {
     socket.removeAllListeners();

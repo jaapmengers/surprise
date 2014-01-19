@@ -1,6 +1,6 @@
 <div class="jumbotron">
 	<div class="container">
-		<p>{{question.question}}</p>
+		<p ng-bind-html="question.question"></p>
 	</div>
 </div>
 
@@ -8,7 +8,7 @@
 	<div ng-repeat="answer in question.answers" class="row">
 		<div class="well answertext container" ng-click="doAnswer(answer)" ng-disabled="" ng-class="{selected: answer.selected, disabled: !answerenabled}">
 			<div class="col-md-12">
-				<h3>A. {{answer.answer}}</h3>
+				<h3>{{getAnswerLetter(answer.number)}}. {{answer.answer}}</h3>
 			</div>
 		</div>
 	</div>

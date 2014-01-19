@@ -1,7 +1,7 @@
 'use strict';
 
 /* Controllers */
-var app = angular.module('quizApp', ['ngRoute', 'quizControllers']);
+var app = angular.module('quizApp', ['ngRoute', 'ngSanitize', 'quizControllers']);
 app.config(['$routeProvider', 
   function($routeProvider){
     $routeProvider.
@@ -37,9 +37,15 @@ quizControllers.controller('SupportVoteCtrl', ['$scope', '$location', 'socket', 
 
 quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
   var nr = $routeParams.questionNr;
-  $scope.question = _.find(questions, function(it){
+  var q = _.find(questions, function(it){
     return it.number == nr;
   });
+
+  $scope.question = resetQuestion(q);
+
+  $scope.getAnswerLetter = function(nr) {
+    return getAnswerLetter(nr);
+  };
 
   var roundEnded = function(){
     $location.path('/leeg');

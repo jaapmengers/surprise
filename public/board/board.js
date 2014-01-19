@@ -1,7 +1,7 @@
 'use strict';
 
 /* Controllers */
-var app = angular.module('quizApp', ['ngRoute', 'quizControllers']);
+var app = angular.module('quizApp', ['ngRoute', 'ngSanitize', 'quizControllers']);
 app.config(['$routeProvider', 
   function($routeProvider){
     $routeProvider.
@@ -30,9 +30,26 @@ app.config(['$routeProvider',
       });
   }]);
 
+
+var saveQuestionStateInLocalStorage = function(qs){
+  localStorage["questions"] = JSON.stringify(qs);
+};
+
+var loadInitialOrGetFromStorage = function(){
+  if(!localStorage["questions"]){
+    console.log("No localStorage state available. Initializing");
+    console.log(questions);
+    saveQuestionStateInLocalStorage(questions);
+  } else {
+    console.log("Loading from localStorage");
+  }
+  return JSON.parse(localStorage["questions"]);
+};
+
 var currentQuestion = null;
 var currentTile = null;
 var didBind = false;
+var boardQuestions = loadInitialOrGetFromStorage();
 
 var quizControllers = angular.module('quizControllers', []);
 
@@ -92,6 +109,8 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
         currentItem.active = true;
         previousItem = currentItem;
         $scope.$apply();
+      } else {
+        console.log("Help, dit gaat fout!");
       }
     }, 200);
   };
@@ -102,9 +121,10 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
     currentTile = _.find($scope.tiles, function(it){
       return it.active;
     });
+    
+    currentQuestion = boardQuestions.pop();
+    saveQuestionStateInLocalStorage(boardQuestions);
 
-    currentQuestion = questions.pop();
-    console.log(currentQuestion);
     emit('request:tileSelected', {questionNr: currentQuestion.number});
   };
 
@@ -148,26 +168,11 @@ quizControllers.controller('BoardCtrl', ['$scope', '$routeParams', '$location', 
   socket.on('receive:doInit', init);
   socket.on('receive:finishGame', finishGame);
 
-  /* Hier gebleven. Volgende stap is overwegen of het blok 'setup tiles' 
-   * beter op basis van een event vanuit de GameControls kan verlopen.
-   * Vervolgens:
-   * - Supportvote spullen bouwen
-   * - De lijst van vragen en de status daarvan persisten in local storage
-   * - Stylen
-   * - Vragen verzinnen
-   */
-
 }]);
 
 quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
 
-  $scope.question = currentQuestion;
-
-  // var nr = $routeParams.nr;
-  // console.log(nr);
-  // $scope.question = _.find(questions, function(it){
-  //   return it.number == nr;
-  // });
+  $scope.question = resetQuestion(currentQuestion);
 
   var selectedAnswer = null;
 
@@ -184,6 +189,9 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams
     return Math.round((number / total) * 100);
   }
 
+  $scope.getAnswerLetter = function(nr) {
+    return getAnswerLetter(nr);
+  }; 
     
   socket.on('receive:doAnswer', function(data){
     console.log('receive:doAnswer');
@@ -210,6 +218,16 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams
     if(selectedAnswer.correct){
       $location.path('/correct');
     } else {
+
+      console.log(boardQuestions);
+
+      console.log(boardQuestions.map(function(it){return it.question;}));
+
+      boardQuestions.unshift($scope.question);
+      saveQuestionStateInLocalStorage(boardQuestions);
+
+      console.log(boardQuestions.map(function(it){return it.question;}));
+
       $location.path('/wrong');
     }
     $scope.$$phase || $scope.$apply();
@@ -222,7 +240,6 @@ quizControllers.controller('QuestionCtrl', ['$scope', '$location', '$routeParams
   });
 
   var enableSubmitAnswer = function(){
-    console.log('request:enableSubmitAnswer');
     socket.emit('request:enableSubmitAnswer');
   }
 }]);

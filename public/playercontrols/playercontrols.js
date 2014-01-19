@@ -1,7 +1,7 @@
 'use strict';
 
 /* Controllers */
-var app = angular.module('quizApp', ['ngRoute', 'quizControllers']);
+var app = angular.module('quizApp', ['ngRoute', 'ngSanitize', 'quizControllers']);
 app.config(['$routeProvider', 
   function($routeProvider){
     $routeProvider.
@@ -53,9 +53,11 @@ quizControllers.controller('PlayerControlsCtrl', ['$scope', '$location', 'socket
 
 quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', 'socket', function ($scope, $location, $routeParams, socket) {
   var nr = $routeParams.questionNr;
-  $scope.question = _.find(questions, function(it){
+  var q = _.find(questions, function(it){
     return it.number == nr;
   });
+
+  $scope.question = resetQuestion(q);
 
   $scope.answerenabled = true;
 
@@ -67,6 +69,10 @@ quizControllers.controller('QuizCtrl', ['$scope', '$location', '$routeParams', '
       $scope.$$phase || $scope.$apply();
     }
   }
+
+  $scope.getAnswerLetter = function(nr) {
+    return getAnswerLetter(nr);
+  };
 
   $scope.$on('$destroy', function (event) {
     socket.removeAllListeners();
