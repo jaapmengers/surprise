@@ -19,8 +19,7 @@
 	width:0px;
 	height:1px;
 	display:inline;
-	background-image: url('img/bg_blurred.png');
-	background-image: url('img/bg.png');
+	background-image: url('img/bg_blurred.png'), url('img/bg.png');
 }
 
 #board {
